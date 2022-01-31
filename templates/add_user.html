@@ -1,0 +1,17 @@
+{% extends "index.html" %}
+{% block title %}
+<title>Add Birthday</title>
+{%endblock%}
+{% block content %}
+<div>
+    <form method="post">
+        <h3>{{ form.name.label }} {{ form.name()}}</h3>
+        <h3>{{ form.birthday.label }} {{ form.birthday() }}</h3>
+        <h3>{{ form.img_url.label }} {{ form.img_url() }}</h3>
+        <h3> {{ form.submit() }}</h3>
+
+    </form>
+
+</div>
+
+{%endblock content%}
