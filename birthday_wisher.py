@@ -46,7 +46,7 @@ def save_picture(form_picture):
     i.thumbnail(output_size)
     i.save(picture_path)
 
-    return
+    return picture_fn
 
 
 db.create_all()
@@ -61,8 +61,12 @@ def main():
         date = user.date[:5]
         if date == today:
             id = user.id
+
     try:
         birthday = User.query.get(id)
+        print(user.img_url)
+        # db.session.delete(birthday)
+        # db.session.commit()
     except UnboundLocalError:
         return redirect(url_for("add"))
     return render_template("index.html", user=birthday)
@@ -72,14 +76,21 @@ def main():
 def add():
     form = Forms()
     if request.method == "POST":
-        picture_file = save_picture(form.picture.data)
+        picture_file = save_picture(form.img_url.data)
+        print(picture_file)
         user = User(name=form.name.data, date=form.birthday.data, img_url=picture_file)
         db.session.add(user)
+        user.img_url = url_for("static", filename="profile_pics/" + user.img_url)
         db.session.commit()
         return redirect(url_for("main"))
     elif request.method == "GET":
+        now = datetime.now()
+        today = now.strftime("%d-%m-%Y")
         form.name.data = "John Doe"
-        form.birthday.data = "29-01-2001"
+        form.birthday.data = today
+        form.img_url.data = "JPG,JPEG,PNG only"
+        return render_template("add_user.html", form=form)
+
     return render_template("add_user.html", form=form)
 
 
