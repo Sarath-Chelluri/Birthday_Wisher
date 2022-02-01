@@ -1,11 +1,14 @@
-from flask import Flask, redirect, render_template, redirect, url_for, request
-from flask_sqlalchemy import SQLAlchemy
-from wtforms import StringField, SubmitField
-from flask_wtf import FlaskForm
-from wtforms.validators import DataRequired
-from flask_bootstrap import Bootstrap
 from datetime import datetime
-
+import os
+import secrets
+from flask import Flask, redirect, render_template, request, url_for
+from flask_bootstrap import Bootstrap
+from flask_sqlalchemy import SQLAlchemy
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, SubmitField
+from wtforms.validators import DataRequired
+from PIL import Image
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
@@ -28,8 +31,22 @@ class Forms(FlaskForm):
         "Enter Birthday",
         validators=[DataRequired()],
     )
-    img_url = StringField("Enter Image Url", validators=[DataRequired()])
+    img_url = FileField("Add Image", validators=[FileAllowed(["jpg", "png", "jpeg"])])
     submit = SubmitField("Submit")
+
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, "static/profile_pics", picture_fn)
+
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+    i.save(picture_path)
+
+    return
 
 
 db.create_all()
@@ -39,7 +56,6 @@ db.create_all()
 def main():
     now = datetime.now()
     today = now.strftime("%d-%m")
-    print(today)
     users = User.query.all()
     for user in users:
         date = user.date[:5]
@@ -56,14 +72,14 @@ def main():
 def add():
     form = Forms()
     if request.method == "POST":
-        name = form.name.data
-        user = User(
-            name=form.name.data, date=form.birthday.data, img_url=form.img_url.data
-        )
-        print(name)
+        picture_file = save_picture(form.picture.data)
+        user = User(name=form.name.data, date=form.birthday.data, img_url=picture_file)
         db.session.add(user)
         db.session.commit()
         return redirect(url_for("main"))
+    elif request.method == "GET":
+        form.name.data = "John Doe"
+        form.birthday.data = "29-01-2001"
     return render_template("add_user.html", form=form)
 
 
