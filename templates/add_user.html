@@ -5,13 +5,29 @@
 {% block content %}
 <div>
     <form method="post" , enctype="multipart/form-data">
-        <h3>{{ form.name.label }} {{ form.name()}}</h3>
-        <h3>{{ form.birthday.label }} {{ form.birthday() }}</h3>
-        <h3>{{ form.img_url.label }} </h3>
-        <h3>{{ form.img_url() }}</h3>
-        <h3> {{ form.submit() }}</h3>
+
+        <h4>{{ form.name.label }}</h4>
+        <br>
+        <h4> {{ form.name(render_kw=dict(class='my_class'))}}</h4>
+        <br>
+
+        <h4>{{ form.birthday.label }} </h4>
+        <br>
+
+        <h4>{{ form.birthday() }}</h4>
+        <br>
+
+        <h4>{{ form.img_url.label }} </h4>
+        <br>
+
+        <h4>{{ form.img_url() }}</h4>
+        <br>
+
+        <h4> {{ form.submit() }}</h4>
+
 
     </form>
+
 
 </div>
 
