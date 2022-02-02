@@ -8,11 +8,11 @@ from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
-from PIL import Image
 
 app = Flask(__name__)
 db = SQLAlchemy(app)
 Bootstrap(app)
+
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///birthday.sqlite3"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["SECRET_KEY"] = "lol"
@@ -41,10 +41,7 @@ def save_picture(form_picture):
     picture_fn = random_hex + f_ext
     picture_path = os.path.join(app.root_path, "static/profile_pics", picture_fn)
 
-    output_size = (125, 125)
-    i = Image.open(form_picture)
-    i.thumbnail(output_size)
-    i.save(picture_path)
+    form_picture.save(picture_path)
 
     return picture_fn
 
@@ -61,14 +58,13 @@ def main():
         date = user.date[:5]
         if date == today:
             id = user.id
-
     try:
         birthday = User.query.get(id)
         print(user.img_url)
-        # db.session.delete(birthday)
-        # db.session.commit()
+
     except UnboundLocalError:
         return redirect(url_for("add"))
+
     return render_template("index.html", user=birthday)
 
 
@@ -82,13 +78,15 @@ def add():
         db.session.add(user)
         user.img_url = url_for("static", filename="profile_pics/" + user.img_url)
         db.session.commit()
+
         return redirect(url_for("main"))
+
     elif request.method == "GET":
         now = datetime.now()
         today = now.strftime("%d-%m-%Y")
         form.name.data = "John Doe"
         form.birthday.data = today
-        form.img_url.data = "JPG,JPEG,PNG only"
+
         return render_template("add_user.html", form=form)
 
     return render_template("add_user.html", form=form)
